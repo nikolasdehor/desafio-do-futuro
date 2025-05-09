@@ -1,0 +1,141 @@
+<!-- index.html para o Jogo Exclusivo "Desafio do Futuro" -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desafio do Futuro - Nikolas</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1f1c2c, #928dab);
+      font-family: sans-serif;
+      color: #fff;
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 18px;
+      background: rgba(0,0,0,0.5);
+      padding: 5px 10px;
+      border-radius: 8px;
+    }
+    #message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 24px;
+      text-align: center;
+      display: none;
+    }
+    canvas {
+      display: block;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      background-color: #fff;
+      color: #333;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="score">Score: 0</div>
+  <div id="message">
+    Parabéns! Quer trabalhar comigo?<br>
+    <a href="https://linkedin.com/in/nikolasdehor" target="_blank"><button>Me chame no LinkedIn</button></a>
+  </div>
+  <canvas id="game"></canvas>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const player = { x: 50, y: canvas.height / 2, size: 30, color: '#00ffcc' };
+    let score = 0;
+    const scoreDiv = document.getElementById('score');
+    const messageDiv = document.getElementById('message');
+
+    const items = [];
+    const obstacles = [];
+
+    function spawnItem() {
+      items.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: 20,
+        color: '#ffcc00'
+      });
+    }
+
+    function spawnObstacle() {
+      obstacles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: 25,
+        color: '#ff0033'
+      });
+    }
+
+    function drawCircle(obj) {
+      ctx.beginPath();
+      ctx.arc(obj.x, obj.y, obj.size, 0, Math.PI * 2);
+      ctx.fillStyle = obj.color;
+      ctx.fill();
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawCircle(player);
+
+      items.forEach((item, index) => {
+        drawCircle(item);
+        if (Math.hypot(player.x - item.x, player.y - item.y) < player.size + item.size) {
+          score++;
+          items.splice(index, 1);
+          spawnItem();
+        }
+      });
+
+      obstacles.forEach((ob, index) => {
+        drawCircle(ob);
+        if (Math.hypot(player.x - ob.x, player.y - ob.y) < player.size + ob.size) {
+          gameOver();
+        }
+      });
+
+      scoreDiv.textContent = 'Score: ' + score;
+    }
+
+    function gameOver() {
+      messageDiv.style.display = 'block';
+      cancelAnimationFrame(loop);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') player.y -= 20;
+      if (e.key === 'ArrowDown') player.y += 20;
+      if (e.key === 'ArrowLeft') player.x -= 20;
+      if (e.key === 'ArrowRight') player.x += 20;
+    });
+
+    function loopFn() {
+      update();
+      loop = requestAnimationFrame(loopFn);
+    }
+
+    spawnItem();
+    setInterval(spawnObstacle, 3000);
+    let loop = requestAnimationFrame(loopFn);
+  </script>
+</body>
+</html>
